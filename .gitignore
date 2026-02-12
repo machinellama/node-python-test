@@ -2,7 +2,6 @@
 
 /coverage
 *.report.html
-apps/humanityisevil-website/package.json
 .env
 .env.test
 .env.prod
@@ -11,13 +10,7 @@ apps/humanityisevil-website/package.json
 .nx/cache
 .nx
 docker/nginx
-
-project_archive.tar.gz
-
-__pycache__
-
 data
-docker/certbot
 
 # compiled output
 dist
@@ -30,6 +23,7 @@ tmp
 
 # dependencies
 node_modules
+__pycache__
 
 # IDEs and editors
 /.idea
