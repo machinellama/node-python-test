@@ -1,0 +1,68 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+/coverage
+*.report.html
+apps/humanityisevil-website/package.json
+.env
+.env.test
+.env.prod
+.test.env
+.vscode
+.nx/cache
+.nx
+docker/nginx
+
+project_archive.tar.gz
+
+__pycache__
+
+data
+docker/certbot
+
+# compiled output
+dist
+tmp
+/out-tsc
+
+/build
+/dist
+/server
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Next.js
+.next
+.vscode
+# Local Netlify folder
+.netlify
