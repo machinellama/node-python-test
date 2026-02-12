@@ -6,8 +6,14 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
+
+// CORS: allow all origins (adjust as needed)
+app.use(cors());
+app.options("*", cors()); // enable pre-flight for all routes
+
 app.use(bodyParser.json());
 
 const FUNCTIONS_DIR = path.join(__dirname, "functions");

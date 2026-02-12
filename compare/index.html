@@ -1,0 +1,279 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Function Output Comparator</title>
+  <style>
+    /* styles.css */
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1720;
+      --muted:#98a0ad;
+      --accent:#7ee787;
+      --danger:#ff6b6b;
+      --card:#0b1220;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --focus: rgba(126,231,135,0.12);
+      --mono: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--mono);
+      background:linear-gradient(180deg,#071018 0%,#071018 40%, #051017 100%);
+      color:#e6eef7;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .app{max-width:1200px;margin:28px auto;padding:20px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(2,6,23,0.7)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg, rgba(126,231,135,0.06), rgba(126,231,135,0.02))}
+    .brand{font-weight:700;font-size:18px;color:var(--accent)}
+    .subtitle{font-size:12px;color:var(--muted)}
+    main{display:grid;grid-template-columns:360px 1fr;padding:18px;gap:18px}
+    .controls{background:var(--panel);padding:16px;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+    .row{display:flex;flex-direction:column;margin-bottom:12px}
+    .row label{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .row input, .row select, .row textarea{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.03);
+      color:#e6eef7;
+      padding:10px 12px;border-radius:8px;font-size:13px;
+      outline:none;transition:box-shadow .12s, border-color .12s;
+    }
+    .row input:focus, .row textarea:focus, .row select:focus{box-shadow:0 0 0 6px var(--focus);border-color:rgba(126,231,135,0.45)}
+    .row.tall textarea{height:160px;resize:vertical;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
+    .actions{display:flex;gap:10px;margin-top:6px}
+    button{padding:10px 14px;border-radius:9px;border:0;cursor:pointer;font-weight:600}
+    button.primary{background:linear-gradient(180deg,var(--accent), #52c76a);color:#04210a;box-shadow:0 6px 18px rgba(46,133,74,0.18)}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .results{grid-column:2/3;display:grid;grid-template-columns:1fr 320px 1fr;gap:18px;align-items:start}
+    .side .panel{background:var(--card);padding:14px;border-radius:10px;min-height:260px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--muted);margin-bottom:8px}
+    .output{background:transparent;color:#dfefff;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);height:360px;overflow:auto;font-size:13px;white-space:pre-wrap;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
+    .middle{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+    .comparison{background:var(--panel);padding:12px;border-radius:10px;min-height:420px}
+    .comparison-head{font-weight:700;color:var(--muted);margin-bottom:8px}
+    .summary{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .indicator{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;background:rgba(255,255,255,0.02);color:var(--muted)}
+    .diff-stats{color:var(--muted);font-size:13px}
+    .diffs{background:var(--glass-2);padding:10px;border-radius:8px;min-height:300px;overflow:auto;color:#cfe9ff;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px}
+    .diff-added{background:rgba(126,231,135,0.07);border-left:4px solid rgba(126,231,135,0.18);padding:6px;border-radius:6px;margin:6px 0;color:var(--accent)}
+    .diff-removed{background:rgba(255,107,107,0.06);border-left:4px solid rgba(255,107,107,0.14);padding:6px;border-radius:6px;margin:6px 0;color:var(--danger)}
+    .diff-changed{background:rgba(255,195,0,0.04);border-left:4px solid rgba(255,195,0,0.12);padding:6px;border-radius:6px;margin:6px 0;color:#ffd06a}
+    .footer{margin-top:14px;padding:12px;color:var(--muted);font-size:12px;text-align:center}
+    @media (max-width:980px){
+      main{grid-template-columns:1fr;padding:12px}
+      .results{grid-template-columns:1fr;grid-auto-rows:auto}
+      .middle{order:3}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">Func Comparator</div>
+      <div class="subtitle">Compare Python & Node function outputs</div>
+    </header>
+    <main>
+      <section class="controls">
+        <div class="row">
+          <label>Python URL</label>
+          <input id="pyUrl" placeholder="http://localhost:8000/your-function" />
+        </div>
+        <div class="row">
+          <label>Node URL</label>
+          <input id="nodeUrl" placeholder="http://localhost:3000/your-function" />
+        </div>
+        <div class="row">
+          <label>Function path (optional suffix)</label>
+          <input id="funcPath" placeholder="/invoke or leave blank" />
+        </div>
+        <div class="row">
+          <label>HTTP Method</label>
+          <select id="method">
+            <option>POST</option>
+            <option>PUT</option>
+            <option>GET</option>
+          </select>
+        </div>
+        <div class="row tall">
+          <label>JSON Input</label>
+          <textarea id="jsonInput" placeholder='{"key":"value"}'></textarea>
+        </div>
+        <div class="actions">
+          <button id="submitBtn" class="primary">Submit</button>
+          <button id="clearBtn" class="ghost">Clear</button>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="side">
+          <div class="panel">
+            <div class="panel-head">Python Response <span id="pyStatus"></span></div>
+            <pre id="pyOutput" class="output"></pre>
+          </div>
+        </div>
+
+        <div class="middle">
+          <div class="comparison">
+            <div class="comparison-head">Comparison</div>
+            <div class="summary">
+              <div class="indicator" id="indicator">—</div>
+              <div class="diff-stats" id="diffStats">No run yet</div>
+            </div>
+            <div class="diffs" id="diffs"></div>
+          </div>
+        </div>
+
+        <div class="side">
+          <div class="panel">
+            <div class="panel-head">Node Response <span id="nodeStatus"></span></div>
+            <pre id="nodeOutput" class="output"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Open endpoint URLs must accept CORS from this page.</div>
+    </footer>
+  </div>
+  <script>
+    // app.js
+    const $ = id => document.getElementById(id);
+    const parseJson = txt => {
+      try { return { ok:true, value: JSON.parse(txt) } }
+      catch(e){ return { ok:false, error:e } }
+    }
+    const pretty = v => JSON.stringify(v, null, 2)
+    const setStatus = (el, code, ok) => {
+      el.textContent = code ? `${code}` : ''
+      el.style.color = ok ? '#7ee787' : '#ff6b6b'
+    }
+    const setIndicator = same => {
+      const el = $('indicator')
+      if(same === null){ el.textContent = '—'; el.style.background='rgba(255,255,255,0.02)'; el.style.color='var(--muted)'; return }
+      if(same){ el.textContent='OK'; el.style.background='linear-gradient(180deg,#2f8f3d,#168a2f)'; el.style.color='#04210a' }
+      else{ el.textContent='DIFF'; el.style.background='linear-gradient(180deg,#ff6b6b,#ff3b3b)'; el.style.color='#230000' }
+    }
+    const compareJson = (a,b) => {
+      if(a === b) return { same:true, diffs:[] }
+      const diffs = []
+      const recurse = (x,y,path='') => {
+        const tx = Object.prototype.toString.call(x)
+        const ty = Object.prototype.toString.call(y)
+        if(tx !== ty){
+          diffs.push({type:'changed',path, a:x, b:y}); return
+        }
+        if(tx === '[object Object]'){
+          const keys = new Set([...Object.keys(x||{}), ...Object.keys(y||{})])
+          keys.forEach(k => {
+            if(!(k in x)) diffs.push({type:'added',path: path?path+'.'+k:k, a:undefined, b:y[k]})
+            else if(!(k in y)) diffs.push({type:'removed',path: path?path+'.'+k:k, a:x[k], b:undefined})
+            else recurse(x[k], y[k], path?path+'.'+k:k)
+          })
+          return
+        }
+        if(tx === '[object Array]'){
+          const len = Math.max((x||[]).length, (y||[]).length)
+          for(let i=0;i<len;i++){
+            if(i >= x.length) diffs.push({type:'added',path: path+`[${i}]`, a:undefined, b:y[i]})
+            else if(i >= y.length) diffs.push({type:'removed',path: path+`[${i}]`, a:x[i], b:undefined})
+            else recurse(x[i], y[i], path+`[${i}]`)
+          }
+          return
+        }
+        if(JSON.stringify(x) !== JSON.stringify(y)) diffs.push({type:'changed',path, a:x, b:y})
+      }
+      recurse(a,b,'')
+      return { same: diffs.length === 0, diffs }
+    }
+
+    const renderDiffs = diffs => {
+      const out = []
+      if(diffs.length === 0) return '<div style="color:var(--muted)">No differences</div>'
+      diffs.forEach(d => {
+        if(d.type === 'added') out.push(`<div class="diff-added"><strong>Added:</strong> ${d.path}\n<pre>${escapeHtml(pretty(d.b))}</pre></div>`)
+        else if(d.type === 'removed') out.push(`<div class="diff-removed"><strong>Removed:</strong> ${d.path}\n<pre>${escapeHtml(pretty(d.a))}</pre></div>`)
+        else out.push(`<div class="diff-changed"><strong>Changed:</strong> ${d.path}\n<div style="display:flex;gap:8px"><div style="flex:1"><small style="color:var(--muted)">Python</small><pre>${escapeHtml(pretty(d.a))}</pre></div><div style="flex:1"><small style="color:var(--muted)">Node</small><pre>${escapeHtml(pretty(d.b))}</pre></div></div></div>`)
+      })
+      return out.join('')
+    }
+
+    const escapeHtml = str => str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+
+    const submit = async () => {
+      const pyUrl = ($('pyUrl').value || '').trim()
+      const nodeUrl = ($('nodeUrl').value || '').trim()
+      const pathSuffix = ($('funcPath').value || '').trim()
+      const method = $('method').value || 'POST'
+      const raw = $('jsonInput').value.trim()
+      const parsed = parseJson(raw)
+      if(!parsed.ok){ $('pyOutput').textContent = 'Invalid JSON input'; $('nodeOutput').textContent = 'Invalid JSON input'; $('diffs').innerHTML = ''; setIndicator(null); $('diffStats').textContent='Invalid JSON'; setStatus($('pyStatus'), '', false); setStatus($('nodeStatus'), '', false); return }
+      const body = parsed.value
+      const headers = { 'Content-Type': 'application/json' }
+
+      const doFetch = async (url) => {
+        if(!url) return { ok:false, status:null, text:'No URL provided' }
+        const full = pathSuffix ? (url.replace(/\/+$/,'') + (pathSuffix.startsWith('/')?pathSuffix:('/'+pathSuffix))) : url
+        try{
+          const opts = { method, headers }
+          if(method !== 'GET') opts.body = JSON.stringify(body)
+          const res = await fetch(full, opts)
+          const text = await res.text()
+          let json
+          try{ json = JSON.parse(text) }catch(e){ json = text }
+          return { ok: res.ok, status: res.status, value: json, raw: text }
+        }catch(e){ return { ok:false, status:null, text: e.message || String(e) } }
+      }
+
+      $('pyOutput').textContent = 'Running...'
+      $('nodeOutput').textContent = 'Running...'
+      $('diffs').innerHTML = ''
+      setIndicator(null)
+      $('diffStats').textContent = 'Running...'
+      setStatus($('pyStatus'), '', false); setStatus($('nodeStatus'), '', false)
+
+      const [py, node] = await Promise.all([ doFetch(pyUrl), doFetch(nodeUrl) ])
+
+      if(py.status) setStatus($('pyStatus'), py.status, py.ok)
+      else setStatus($('pyStatus'), '', false)
+      if(node.status) setStatus($('nodeStatus'), node.status, node.ok)
+      else setStatus($('nodeStatus'), '', false)
+
+      $('pyOutput').textContent = py.value !== undefined ? pretty(py.value) : (py.text || pretty(py.raw))
+      $('nodeOutput').textContent = node.value !== undefined ? pretty(node.value) : (node.text || pretty(node.raw))
+
+      let a = py.value !== undefined ? py.value : tryParseText(py.raw || py.text)
+      let b = node.value !== undefined ? node.value : tryParseText(node.raw || node.text)
+      const cmp = compareJson(a,b)
+      setIndicator(cmp.same)
+      $('diffs').innerHTML = renderDiffs(cmp.diffs)
+      $('diffStats').textContent = cmp.same ? 'Outputs identical' : `${cmp.diffs.length} difference(s)`
+    }
+
+    const tryParseText = t => {
+      if(t === undefined) return t
+      try{ return JSON.parse(t) }catch(e){ return String(t) }
+
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      $('submitBtn').addEventListener('click', submit)
+      $('clearBtn').addEventListener('click', () => {
+        $('pyUrl').value='http://localhost:3100'
+        $('nodeUrl').value='http://localhost:3200'
+        $('funcPath').value='/add'
+        $('method').value='POST'
+        $('jsonInput').value='{ "first": 1, "second": 2 }'
+        $('pyOutput').textContent=''; $('nodeOutput').textContent=''; $('diffs').innerHTML=''; setIndicator(null); $('diffStats').textContent='No run yet'; setStatus($('pyStatus'), '',''); setStatus($('nodeStatus'), '','')
+      })
+      $('clearBtn').click()
+    })
+  </script>
+</body>
+</html>

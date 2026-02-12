@@ -5,8 +5,11 @@ PORT = 3100
 import os
 import importlib.util
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 APP = Flask(__name__)
+CORS(APP)  # allow all origins; optionally configure origins, methods, headers
+
 FUNCTIONS_DIR = os.path.join(os.path.dirname(__file__), "functions")
 
 def load_module_from_path(name, path):
